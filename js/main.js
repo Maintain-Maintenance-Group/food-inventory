@@ -145,36 +145,35 @@ function setupDatabaseListeners() {
       row.appendChild(nameInput);
 
         // Minus button
-	const minus = document.createElement('button');
-	minus.textContent = '–';
-	minus.onclick = () => {
-	  items[i].quantity = Math.max(0, (items[i].quantity || 0) - 1);
-	  qty.value = items[i].quantity;
-	  set(itemsRef, items).catch(console.error);
-	};
-	row.appendChild(minus);
-	
-	// Quantity input
-	const qty = document.createElement('input');
-	qty.type = 'number';
-	qty.min = 0;
-	qty.value = item.quantity;
-	qty.onchange = () => {
-	  items[i].quantity = parseInt(qty.value) || 0;
-	  set(itemsRef, items).catch(console.error);
-	};
-	row.appendChild(qty);
-	
-	// Plus button
-	const plus = document.createElement('button');
-	plus.textContent = '+';
-	plus.onclick = () => {
- 	 items[i].quantity = (items[i].quantity || 0) + 1;
- 	 qty.value = items[i].quantity;
-	  set(itemsRef, items).catch(console.error);
-	};
-	row.appendChild(plus);
+const minus = document.createElement('button');
+minus.textContent = '–';
+minus.onclick = () => {
+  items[i].quantity = Math.max(0, (items[i].quantity || 0) - 1);
+  qty.value = items[i].quantity;
+  set(itemsRef, items).catch(console.error);
+};
+row.appendChild(minus);
 
+// Quantity input
+const qty = document.createElement('input');
+qty.type = 'number';
+qty.min = 0;
+qty.value = item.quantity;
+qty.onchange = () => {
+  items[i].quantity = parseInt(qty.value) || 0;
+  set(itemsRef, items).catch(console.error);
+};
+row.appendChild(qty);
+
+// Plus button
+const plus = document.createElement('button');
+plus.textContent = '+';
+plus.onclick = () => {
+  items[i].quantity = (items[i].quantity || 0) + 1;
+ qty.value = items[i].quantity;
+  set(itemsRef, items).catch(console.error);
+};
+row.appendChild(plus);
 
       container.appendChild(row);
     });
