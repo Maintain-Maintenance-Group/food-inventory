@@ -16,7 +16,7 @@ main#inventory {
 
 /* (You can remove this if you don't want it globally)
 button {
-  padding: 8px 12px;
+  padding: 6px 8px;
 }
 */
 
@@ -26,7 +26,7 @@ button {
 .row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 12px;
   overflow: hidden; /* ensure children stay within the row */
   padding: 4px 0;   /* optional extra breathing room */
@@ -36,7 +36,7 @@ button {
    Delete‐button styling
 ───────────────────────────────────────────────────────────────────────────── */
 .delete-btn {
-  margin-right: 8px;
+  margin-right: 4px;
   background: #c00;
   color: #fff;
   border-color: #900;
@@ -63,7 +63,7 @@ button {
 ───────────────────────────────────────────────────────────────────────────── */
 .row input[type="text"] {
   flex: 1 1 auto;           /* take remaining space */
-  max-width: 200px;
+  max-width:175px;
   padding: 6px;
   box-sizing: border-box;
 }
@@ -87,7 +87,7 @@ button {
 
   .row input[type="text"] {
     flex: 1 0 auto;           /* grow but don’t shrink below content */
-    max-width: 200px;         /* ensure it’s tap-able */
+    max-width: 175px;         /* ensure it’s tap-able */
   }
 
   .row input[type="number"] {
