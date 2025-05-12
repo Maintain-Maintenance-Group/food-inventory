@@ -61,13 +61,24 @@ function setupPantryListeners() {
     renderPantry(pantryData);
   });
 
-  // Add a new folder
+    // Add a new folder (with debug + immediate UI update)
   document.getElementById('add-folder').onclick = () => {
     const name = prompt('New folder name:');
+    console.log('🗂️ Add folder clicked, name =', name);
     if (!name) return;
+
+    // 1) Update local data
     pantryData[name] = pantryData[name] || [];
-    set(pantryRef, pantryData);
+
+    // 2) Immediately redraw the UI so you can see it
+    renderPantry(pantryData);
+
+    // 3) Save to Firebase in the background
+    set(pantryRef, pantryData)
+      .then(() => console.log('✅ Pantry saved with new folder'))
+      .catch(console.error);
   };
+
 
   // Render function
   function renderPantry(data) {
