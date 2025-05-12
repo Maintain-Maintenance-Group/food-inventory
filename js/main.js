@@ -103,3 +103,7 @@ function setupDatabaseListeners() {
 
     items.forEach((item, i) => {
 
+    });
+  }
+}
+
