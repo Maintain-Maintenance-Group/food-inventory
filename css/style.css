@@ -87,7 +87,7 @@ button {
 
   .row input[type="text"] {
     flex: 1 0 auto;           /* grow but don’t shrink below content */
-    min-width: 100px;         /* ensure it’s tap-able */
+    max-width: 200px;         /* ensure it’s tap-able */
   }
 
   .row input[type="number"] {
