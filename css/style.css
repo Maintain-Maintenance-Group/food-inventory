@@ -82,8 +82,7 @@ button {
 @media (max-width: 600px) {
   .row {
     flex-wrap: nowrap;        /* keep everything on one line */
-    overflow-x: auto;         /* allow horizontal swipe */
-    -webkit-overflow-scrolling: touch; /* smooth iOS scrolling */
+   
   }
 
   .row input[type="text"] {
