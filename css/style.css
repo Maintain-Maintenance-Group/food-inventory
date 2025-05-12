@@ -69,8 +69,8 @@ button {
 }
 
 .row input[type="number"] {
-  flex: 0 0 30px;            /* fixed 60px width on desktop */
-  max-width: 30px;
+  flex: 0 0 50px;            /* fixed 60px width on desktop */
+  max-width: 50px;
   text-align: center;
   padding: 6px;
   box-sizing: border-box;
@@ -91,8 +91,8 @@ button {
   }
 
   .row input[type="number"] {
-    flex: 0 0 30px;           /* fixed 50px on mobile */
-    max-width: 30px;
+    flex: 0 0 50px;           /* fixed 50px on mobile */
+    max-width: 50px;
     text-align: center;
     padding: 6px;
     box-sizing: border-box;
