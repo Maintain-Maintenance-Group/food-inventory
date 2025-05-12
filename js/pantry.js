@@ -103,12 +103,6 @@ arrow.className = 'arrow';
 arrow.textContent = isExpanded ? '▼' : '▶';
 fld.appendChild(arrow);
 
-// The items container
-const list = document.createElement('div');
-list.className     = 'folder-items';
-list.style.display = isExpanded ? 'block' : 'none';
-container.appendChild(list);
-
 
       const title = document.createElement('span');
       title.textContent = folder;
@@ -122,6 +116,12 @@ container.appendChild(list);
       fld.appendChild(addBtn);
 
       container.appendChild(fld);
+
+// The items container
+const list = document.createElement('div');
+list.className     = 'folder-items';
+list.style.display = isExpanded ? 'block' : 'none';
+container.appendChild(list);
 
       arrow.onclick = () => {
   const showing = list.style.display === 'block';
