@@ -147,6 +147,6 @@ button {
 
 
 .folder-items {
-  margin-left: .75em;  /* indent items under folder */
+  margin-left: 0.75em;  /* indent items under folder */
 }
 
