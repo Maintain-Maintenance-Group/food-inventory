@@ -34,6 +34,7 @@
   }
    .row input[type="number"] {
   flex: 0 0 25%;
+  min-width: 40p;
   text-align: center;
   padding: 6px;
   box-sizing: border-box;
