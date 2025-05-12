@@ -84,7 +84,9 @@ del.onclick = () => {
   items.splice(i, 1);  // remove this item
   saveItems();
 };
-row.appendChild(del);
+// insert delete button at the very start of the row
+row.insertBefore(del, row.firstChild);
+
 
     // Quantity
     const qty = document.createElement('input');
