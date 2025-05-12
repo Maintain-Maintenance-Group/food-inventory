@@ -1,9 +1,3 @@
-// right under your imports, add this:
-const allowedEmails = [
-  "mikeandmadisonlawn@gmail.com",
-  "letsgotomikeys@gmail.com"
-  "maddylawn@gmail.com"
-];
 
 
 // ─── Imports ─────────────────────────────────────────────────────────────
@@ -21,6 +15,12 @@ import {
   signOut,
   onAuthStateChanged
 } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+// ─── Allowed users ────────────────────────────────────────────────────────
+const allowedEmails = [
+  "letsgotomikeys@gmail.com",
+  "maddylawn@gmail.com",
+  "mikeandmadisonlawn@gmail.com"
+];
 
 // ─── Firebase config ────────────────────────────────────────────────────
 const firebaseConfig = {
