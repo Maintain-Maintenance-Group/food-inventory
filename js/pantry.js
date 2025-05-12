@@ -115,6 +115,25 @@ fld.appendChild(arrow);
       addBtn.className   = 'folder-add';
       fld.appendChild(addBtn);
 
+// Delete‐folder button
+const removeBtn = document.createElement('button');
+removeBtn.textContent = '🗑️';
+removeBtn.className   = 'folder-remove';
+fld.appendChild(removeBtn);
+
+removeBtn.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  // Ask first:
+  if (!confirm(`Delete folder “${folder}” and all its items?`)) return;
+  // Remove from local data
+  delete pantryData[folder];
+  expandedFolders.delete(folder);
+  // Update UI immediately
+  renderPantry(pantryData);
+  // Persist to Firebase
+  set(ref(db, 'pantry'), pantryData).catch(console.error);
+});
+
       container.appendChild(fld);
 
 // The items container

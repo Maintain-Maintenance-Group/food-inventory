@@ -132,6 +132,20 @@ button {
   flex: 0 0 auto;
 }
 
+/* Delete‐folder button */
+.folder-remove {
+  background: #900;
+  color: #fff;
+  border: 1px solid #600;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  flex: 0 0 auto;
+  margin-left: 4px;     /* space from the + button */
+}
+
+
 .folder-items {
   margin-left: 1.5em;  /* indent items under folder */
 }
