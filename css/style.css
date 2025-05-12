@@ -63,14 +63,14 @@ button {
 ───────────────────────────────────────────────────────────────────────────── */
 .row input[type="text"] {
   flex: 1 1 auto;           /* take remaining space */
-  max-width:175px;
+  max-width:150px;
   padding: 6px;
   box-sizing: border-box;
 }
 
 .row input[type="number"] {
-  flex: 0 0 60px;            /* fixed 60px width on desktop */
-  max-width: 60px;
+  flex: 0 0 50px;            /* fixed 60px width on desktop */
+  max-width: 50px;
   text-align: center;
   padding: 6px;
   box-sizing: border-box;
@@ -87,7 +87,7 @@ button {
 
   .row input[type="text"] {
     flex: 1 0 auto;           /* grow but don’t shrink below content */
-    max-width: 175px;         /* ensure it’s tap-able */
+    max-width: 150px;         /* ensure it’s tap-able */
   }
 
   .row input[type="number"] {
