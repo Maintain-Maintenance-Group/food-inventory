@@ -15,6 +15,19 @@ import {
   signOut,
   onAuthStateChanged
 } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+// ─────────────────────────────────────────────────────────────────
+// Disable double-tap-to-zoom but keep pinch-to-zoom
+// ─────────────────────────────────────────────────────────────────
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(event) {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    // second tap within 300ms → prevent zoom
+    event.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
+
 // ─── Allowed users ────────────────────────────────────────────────────────
 const allowedEmails = [
   "letsgotomikeys@gmail.com",
