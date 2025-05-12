@@ -69,10 +69,22 @@ function renderItems() {
     const minus = document.createElement('button');
     minus.textContent = '–';
     minus.onclick = () => {
-      items[i].quantity = (items[i].quantity || 0) - 1;
-      saveItems();
-    };
+  // never go below zero
+  items[i].quantity = Math.max(0, (items[i].quantity || 0) - 1);
+  saveItems();
+};
+
     row.appendChild(minus);
+
+// ️ Delete button
+const del = document.createElement('button');
+del.textContent = '🗑️';
+del.title = 'Remove this item';
+del.onclick = () => {
+  items.splice(i, 1);  // remove this item
+  saveItems();
+};
+row.appendChild(del);
 
     // Quantity
     const qty = document.createElement('input');
