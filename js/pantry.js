@@ -4,6 +4,9 @@ import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebase
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 
+// Keep track of which folders are currently open
+const expandedFolders = new Set();
+
 // ─── Firebase config (reuse your existing config) ───────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyADqsTz-IHi5JvXLh1pqqFFTZT8RxfBlps",
@@ -91,10 +94,21 @@ function setupPantryListeners() {
       const fld = document.createElement('div');
       fld.className = 'folder';
 
-      const arrow = document.createElement('span');
-      arrow.textContent = '▶';
-      arrow.className   = 'arrow';
-      fld.appendChild(arrow);
+      // Decide if this folder should start open
+const isExpanded = expandedFolders.has(folder);
+
+// Arrow icon
+const arrow = document.createElement('span');
+arrow.className = 'arrow';
+arrow.textContent = isExpanded ? '▼' : '▶';
+fld.appendChild(arrow);
+
+// The items container
+const list = document.createElement('div');
+list.className     = 'folder-items';
+list.style.display = isExpanded ? 'block' : 'none';
+container.appendChild(list);
+
 
       const title = document.createElement('span');
       title.textContent = folder;
@@ -109,24 +123,36 @@ function setupPantryListeners() {
 
       container.appendChild(fld);
 
-      // Items list (initially hidden)
-      const list = document.createElement('div');
-      list.className = 'folder-items';
-      list.style.display = 'none';
-      container.appendChild(list);
-
-      // Toggle collapse
       arrow.onclick = () => {
-        const showing = list.style.display === 'block';
-        arrow.textContent = showing ? '▶' : '▼';
-        list.style.display = showing ? 'none' : 'block';
-      };
+  const showing = list.style.display === 'block';
+  if (showing) {
+    // close folder
+    arrow.textContent = '▶';
+    list.style.display = 'none';
+    expandedFolders.delete(folder);
+  } else {
+    // open folder
+    arrow.textContent = '▼';
+    list.style.display = 'block';
+    expandedFolders.add(folder);
+  }
+};
 
-      // Add item in this folder
+
       addBtn.onclick = () => {
-        items.push({ name: '', quantity: 0 });
-        set(pantryRef, pantryData);
-      };
+  items.push({ name: '', quantity: 0 });
+
+  // ensure this folder stays open
+  expandedFolders.add(folder);
+
+  // immediately re-render so you see the new row
+  renderPantry(pantryData);
+
+  // then save to Firebase
+  set(pantryRef, pantryData)
+    .catch(console.error);
+};
+
 
       // Render each item row
       items.forEach((item, i) => {
