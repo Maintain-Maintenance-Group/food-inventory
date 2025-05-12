@@ -20,4 +20,26 @@
   border-color: #900;
 }
 
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .row {
+    /* Stack items vertically */
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .row input[type="text"],
+  .row input[type="number"],
+  .row button {
+    /* Full width inputs & buttons on mobile */
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+  }
+
+  .row button:last-of-type {
+    /* Remove extra bottom margin on delete button */
+    margin-bottom: 0;
+  }
+}
 
