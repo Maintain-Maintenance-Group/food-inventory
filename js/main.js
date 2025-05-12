@@ -1,3 +1,11 @@
+// right under your imports, add this:
+const allowedEmails = [
+  "mikeandmadisonlawn@gmail.com",
+  "letsgotomikeys@gmail.com"
+  "maddylawn@gmail.com"
+];
+
+
 // ─── Imports ─────────────────────────────────────────────────────────────
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
 import {
@@ -40,19 +48,31 @@ const userEmail   = document.getElementById('user-email');
 // ─── Auth state listener ──────────────────────────────────────────────────
 onAuthStateChanged(auth, user => {
   const addBtn = document.getElementById('add-row');
+
   if (user) {
+    // ❓ New check: is this user’s email in the allowed list?
+    if (!allowedEmails.includes(user.email)) {
+      alert("⛔️ You (“" + user.email + "”) are not authorized here.");
+      signOut(auth);      // kick them back out
+      return;             // stop running the rest of this block
+    }
+
+    // ——— If we get here, they ARE allowed — show the UI:
     btnSignIn.style.display   = 'none';
     signedInDiv.style.display = 'block';
     userEmail.textContent     = user.email;
     addBtn.style.display      = 'inline-block';
     setupDatabaseListeners();
+
   } else {
+    // when they sign out, hide everything again
     btnSignIn.style.display   = 'block';
     signedInDiv.style.display = 'none';
     addBtn.style.display      = 'none';
     document.getElementById('inventory').innerHTML = '';
   }
 });
+
 
 // ─── Sign-in / Sign-out handlers ──────────────────────────────────────────
 btnSignIn.onclick  = () => signInWithPopup(auth, provider).catch(console.error);
