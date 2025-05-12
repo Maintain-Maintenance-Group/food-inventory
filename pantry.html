@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Food Inventory – Pantry</title>
+  <link rel="stylesheet" href="css/style.css?v=11" />
+</head>
+<body>
+  <!-- Navigation -->
+  <header>
+    <h1>Pantry</h1>
+    <p style="font-size:0.9em;">
+      <a href="index.html">← Fridge/Freezer</a> |
+      <a href="lockers.html">Lockers</a>
+    </p>
+  </header>
+
+  <!-- Auth UI (reuse your existing buttons) -->
+  <div id="auth-ui">
+    <button id="sign-in">🔐 Sign In with Google</button>
+    <div id="signed-in" style="display:none;">
+      <span id="user-email"></span>
+      <button id="sign-out">🚪 Sign Out</button>
+    </div>
+  </div>
+  <hr/>
+
+  <!-- Add new folder button -->
+  <button id="add-folder">+ Add Folder</button>
+
+  <!-- Where folders & items go -->
+  <div id="pantry-container"></div>
+
+  <script type="module" src="js/pantry.js"></script>
+</body>
+</html>
+
