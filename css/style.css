@@ -145,8 +145,10 @@ button {
   margin-left: 4px;     /* space from the + button */
 }
 
-
+/* Force folder items flush with the left (or with minimal indent) */
 .folder-items {
-  margin-left: 0.75em;  /* indent items under folder */
+  margin-left: 0.5em !important;
+  padding-left: 0 !important;
+}
 }
 
