@@ -33,10 +33,13 @@ onValue(itemsRef, (snap) => {
 });
 
 // 6) Add-row button
-document.getElementById('add-row').addEventListener('click', () => {
-  items.push({ name: '', quantity: 0 });
-  saveItems();
-});
+document.getElementById('add-row')
+  .addEventListener('click', () => {
+    console.log("🖱️ + Add Item clicked");
+    items.push({ name: '', quantity: 0 });
+    saveItems();
+  });
+
 
 // 7) Write to Firebase
 function saveItems() {
