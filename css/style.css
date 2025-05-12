@@ -32,10 +32,13 @@
     flex: 1 0 auto;              /* grow but don’t shrink below content */
     min-width: 100px;            /* ensure it’s tap-able */
   }
-  .row input[type="number"] {
-    flex: 0 0 auto;
-    min-width: 50px;
-  }
+   .row input[type="number"] {
+  flex: 0 0 25%;
+  text-align: center;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
   .row button {
     flex: 0 0 auto;
     min-width: 40px;
