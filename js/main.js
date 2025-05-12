@@ -3,7 +3,18 @@ console.log("✅ main.js loaded");
 
 // 1) Import Firebase modules
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
-import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
+import {
+  getDatabase, ref, onValue, set
+} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
+
+// ← NEW AUTH IMPORTS →
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 
 // 2) Your Firebase config (from the console)
 const firebaseConfig = {
@@ -19,6 +30,51 @@ const firebaseConfig = {
 // 3) Init Firebase & Database
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
+
+// ← NEW: Init Auth & UI elements →
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+const btnSignIn = document.getElementById('sign-in');
+const btnSignOut = document.getElementById('sign-out');
+const signedInDiv = document.getElementById('signed-in');
+const userEmailSpan = document.getElementById('user-email');
+
+// 4) Auth state observer
+onAuthStateChanged(auth, user => {
+  if (user) {
+    // show inventory UI
+    btnSignIn.style.display = 'none';
+    signedInDiv.style.display = 'block';
+    userEmailSpan.textContent = user.email;
+
+    // now we can listen for data
+    setupDatabaseListeners();
+
+  } else {
+    // hide inventory UI
+    btnSignIn.style.display = 'block';
+    signedInDiv.style.display = 'none';
+    document.getElementById('inventory').innerHTML = '';
+  }
+});
+
+// 5) Sign-In button
+btnSignIn.onclick = () => {
+  signInWithPopup(auth, provider).catch(console.error);
+};
+
+// 6) Sign-Out button
+btnSignOut.onclick = () => {
+  signOut(auth).catch(console.error);
+};
+
+function setupDatabaseListeners() {
+  // determine pageKey, itemsRef, etc.
+  onValue(itemsRef, snapshot => { … });
+  document.getElementById('add-row').onclick = () => { … };
+  // etc.
+}
+
 
 // 4) Figure out which page we’re on
 const pageKey = location.pathname.includes('lockers.html') ? 'lockers' : 'fridge';
