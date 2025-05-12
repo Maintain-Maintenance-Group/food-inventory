@@ -1,9 +1,52 @@
-/* space the trash icon from the name field */
-.delete-btn {
-  margin-right: 8px;
+/* ────────────────────────────────────────────────────────────────────────────
+   Base styles
+───────────────────────────────────────────────────────────────────────────── */
+body {
+  font-family: sans-serif;
+  margin: 20px;
 }
 
-/* restyle buttons for consistency */
+header h1 {
+  margin-bottom: 0;
+}
+
+main#inventory {
+  margin: 20px 0;
+}
+
+/* (You can remove this if you don't want it globally)
+button {
+  padding: 8px 12px;
+}
+*/
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Row layout
+───────────────────────────────────────────────────────────────────────────── */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  overflow: hidden; /* ensure children stay within the row */
+  padding: 4px 0;   /* optional extra breathing room */
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Delete‐button styling
+───────────────────────────────────────────────────────────────────────────── */
+.delete-btn {
+  margin-right: 8px;
+  background: #c00;
+  color: #fff;
+  border-color: #900;
+  flex: 0 0 auto;
+  min-width: 40px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   General button styling
+───────────────────────────────────────────────────────────────────────────── */
 .row button {
   padding: 6px 10px;
   font-size: 1rem;
@@ -11,34 +54,49 @@
   background: #fff;
   border: 1px solid #888;
   border-radius: 4px;
+  flex: 0 0 auto;
+  min-width: 40px;
 }
 
-/* make the delete button stand out */
-.delete-btn {
-  background: #c00;
-  color: #fff;
-  border-color: #900;
+/* ────────────────────────────────────────────────────────────────────────────
+   Desktop text & number inputs
+───────────────────────────────────────────────────────────────────────────── */
+.row input[type="text"] {
+  flex: 1 1 auto;           /* take remaining space */
+  padding: 6px;
+  box-sizing: border-box;
 }
 
-/* ── Mobile: allow horizontal swipe per row ─────────────────────────── */
-@media (max-width: 600px) {
-  .row {
-    display: flex;               /* keep them in one line */
-    flex-wrap: nowrap;           /* no wrapping to the next line */
-    overflow-x: auto;            /* enable horizontal scroll */
-    -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
-  }
-  .row input[type="text"] {
-    flex: 1 0 auto;              /* grow but don’t shrink below content */
-    min-width: 100px;            /* ensure it’s tap-able */
-  }
-   .row input[type="number"] {
-  flex: 0 0 25%;
-  min-width: 40p;
+.row input[type="number"] {
+  flex: 0 0 60px;            /* fixed 60px width on desktop */
+  max-width: 60px;
   text-align: center;
   padding: 6px;
   box-sizing: border-box;
 }
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Mobile (≤600px): horizontal scroll per row
+───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .row {
+    flex-wrap: nowrap;        /* keep everything on one line */
+    overflow-x: auto;         /* allow horizontal swipe */
+    -webkit-overflow-scrolling: touch; /* smooth iOS scrolling */
+  }
+
+  .row input[type="text"] {
+    flex: 1 0 auto;           /* grow but don’t shrink below content */
+    min-width: 100px;         /* ensure it’s tap-able */
+  }
+
+  .row input[type="number"] {
+    flex: 0 0 50px;           /* fixed 50px on mobile */
+    max-width: 50px;
+    text-align: center;
+    padding: 6px;
+    box-sizing: border-box;
+  }
 
   .row button {
     flex: 0 0 auto;
