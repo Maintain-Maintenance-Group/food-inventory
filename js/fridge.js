@@ -74,7 +74,7 @@ function setupFridgeListeners() {
     fridgeData[name] = fridgeData[name] || [];
 
     // 2) Immediately redraw the UI so you can see it
-    renderFridge(pantryData);
+    renderFridge(fridgeData);
 
     // 3) Save to Firebase in the background
     set(fridgeRef, fridgeData)
@@ -185,7 +185,7 @@ container.appendChild(list);
         del.addEventListener('pointerdown', e => {
           e.preventDefault();
           items.splice(i, 1);
-          set(pantryRef, fridgeData);
+          set(fridgeRef, fridgeData);
         });
         row.appendChild(del);
 
