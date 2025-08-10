@@ -25,10 +25,10 @@ const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // ─── Cache Auth UI elements ────────────────────────────────────────────
-const btnSignIn    = document.getElementById('sign-in');
-const btnSignOut   = document.getElementById('sign-out');
-const signedInDiv  = document.getElementById('signed-in');
-const userEmailSpan= document.getElementById('user-email');
+const btnSignIn     = document.getElementById('sign-in');
+const btnSignOut    = document.getElementById('sign-out');
+const signedInDiv   = document.getElementById('signed-in');
+const userEmailSpan = document.getElementById('user-email');
 
 // ─── Auth observer ─────────────────────────────────────────────────────
 onAuthStateChanged(auth, user => {
@@ -53,7 +53,7 @@ onAuthStateChanged(auth, user => {
 btnSignIn.onclick  = () => signInWithPopup(auth, provider);
 btnSignOut.onclick = () => signOut(auth);
 
-// ─── Fridge setup once authenticated ────────────────────────────────────
+// ─── Main setup once authenticated ────────────────────────────────────
 function setupFridgeListeners() {
   const fridgeRef = ref(db, 'fridge');
   let fridgeData = {};        // { folderName: [items] }
@@ -64,7 +64,7 @@ function setupFridgeListeners() {
     renderFridge(fridgeData);
   });
 
-    // Add a new folder (with debug + immediate UI update)
+  // Add a new folder (with debug + immediate UI update)
   document.getElementById('add-folder').onclick = () => {
     const name = prompt('New folder name:');
     console.log('🗂️ Add folder clicked, name =', name);
@@ -78,14 +78,14 @@ function setupFridgeListeners() {
 
     // 3) Save to Firebase in the background
     set(fridgeRef, fridgeData)
-      .then(() => console.log('✅ fridge saved with new folder'))
+      .then(() => console.log('✅ Fridge saved with new folder'))
       .catch(console.error);
   };
 
-
   // Render function
   function renderFridge(data) {
-    const container = document.getElementById('Fridge-container');
+    const container = document.getElementById('fridge-container');
+    if (!container) { console.warn('renderFridge: ❌ fridge-container not found'); return; }
     container.innerHTML = '';   // clear
 
     // For each folder
@@ -95,14 +95,13 @@ function setupFridgeListeners() {
       fld.className = 'folder';
 
       // Decide if this folder should start open
-const isExpanded = expandedFolders.has(folder);
+      const isExpanded = expandedFolders.has(folder);
 
-// Arrow icon
-const arrow = document.createElement('span');
-arrow.className = 'arrow';
-arrow.textContent = isExpanded ? '▼' : '▶';
-fld.appendChild(arrow);
-
+      // Arrow icon
+      const arrow = document.createElement('span');
+      arrow.className = 'arrow';
+      arrow.textContent = isExpanded ? '▼' : '▶';
+      fld.appendChild(arrow);
 
       const title = document.createElement('span');
       title.textContent = folder;
@@ -115,63 +114,56 @@ fld.appendChild(arrow);
       addBtn.className   = 'folder-add';
       fld.appendChild(addBtn);
 
-// Delete‐folder button
-const removeBtn = document.createElement('button');
-removeBtn.textContent = '🗑️';
-removeBtn.className   = 'folder-remove';
-fld.appendChild(removeBtn);
+      // Delete‐folder button
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '🗑️';
+      removeBtn.className   = 'folder-remove';
+      fld.appendChild(removeBtn);
 
-removeBtn.addEventListener('pointerdown', e => {
-  e.preventDefault();
-  // Ask first:
-  if (!confirm(`Delete folder “${folder}” and all its items?`)) return;
-  // Remove from local data
-  delete fridgeData[folder];
-  expandedFolders.delete(folder);
-  // Update UI immediately
-  renderFridge(fridgeData);
-  // Persist to Firebase
-  set(ref(db, 'fridge'), fridgeData).catch(console.error);
-});
+      removeBtn.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        if (!confirm(`Delete folder “${folder}” and all its items?`)) return;
+        delete fridgeData[folder];
+        expandedFolders.delete(folder);
+        renderFridge(fridgeData);
+        set(ref(db, 'fridge'), fridgeData).catch(console.error);
+      });
 
       container.appendChild(fld);
 
-// The items container
-const list = document.createElement('div');
-list.className     = 'folder-items';
-list.style.display = isExpanded ? 'block' : 'none';
-container.appendChild(list);
+      // The items container
+      const list = document.createElement('div');
+      list.className     = 'folder-items';
+      list.style.display = isExpanded ? 'block' : 'none';
+      container.appendChild(list);
 
       arrow.onclick = () => {
-  const showing = list.style.display === 'block';
-  if (showing) {
-    // close folder
-    arrow.textContent = '▶';
-    list.style.display = 'none';
-    expandedFolders.delete(folder);
-  } else {
-    // open folder
-    arrow.textContent = '▼';
-    list.style.display = 'block';
-    expandedFolders.add(folder);
-  }
-};
-
+        const showing = list.style.display === 'block';
+        if (showing) {
+          // close folder
+          arrow.textContent = '▶';
+          list.style.display = 'none';
+          expandedFolders.delete(folder);
+        } else {
+          // open folder
+          arrow.textContent = '▼';
+          list.style.display = 'block';
+          expandedFolders.add(folder);
+        }
+      };
 
       addBtn.onclick = () => {
-  items.push({ name: '', quantity: 0 });
+        items.push({ name: '', quantity: 0 });
 
-  // ensure this folder stays open
-  expandedFolders.add(folder);
+        // ensure this folder stays open
+        expandedFolders.add(folder);
 
-  // immediately re-render so you see the new row
-  renderFridge(fridgeData);
+        // immediately re-render so you see the new row
+        renderFridge(fridgeData);
 
-  // then save to Firebase
-  set(fridgeRef, fridgeData)
-    .catch(console.error);
-};
-
+        // then save to Firebase
+        set(fridgeRef, fridgeData).catch(console.error);
+      };
 
       // Render each item row
       items.forEach((item, i) => {
@@ -238,4 +230,3 @@ container.appendChild(list);
     });
   }
 }
-
