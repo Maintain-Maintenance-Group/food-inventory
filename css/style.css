@@ -64,13 +64,13 @@ button {
 ───────────────────────────────────────────────────────────────────────────── */
 .row input[type="text"] {
   flex: 1 1 auto;           /* take remaining space */
-  max-width:150px;
+  max-width: 150px;
   padding: 6px;
   box-sizing: border-box;
 }
 
 .row input[type="number"] {
-  flex: 0 0 50px;            /* fixed 60px width on desktop */
+  flex: 0 0 50px;           /* fixed 50px width on desktop */
   max-width: 50px;
   text-align: center;
   padding: 6px;
@@ -78,12 +78,54 @@ button {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
-   Mobile (≤600px): horizontal scroll per row
+   EXP field (to the right of +/-)
+   - Input accepts MM-YY / MM-DD-YY (UI only; JS saves canonical ISO)
+───────────────────────────────────────────────────────────────────────────── */
+.exp-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;         /* spacing after the + button */
+}
+
+.exp-label {
+  font-size: 0.85em;
+  opacity: 0.8;
+  letter-spacing: 0.5px;
+}
+
+.exp-input {
+  width: 9ch;               /* fits MM-DD-YY comfortably */
+  min-width: 7ch;           /* also fine for MM-YY */
+  padding: 6px 8px;
+  box-sizing: border-box;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Status highlights (set by JS)
+───────────────────────────────────────────────────────────────────────────── */
+.row.expired {
+  background: #fff2f2;
+  border-left: 3px solid #e53935;
+}
+
+.row.expiring-soon {
+  background: #fff9e6;
+  border-left: 3px solid #f6a800;
+}
+
+.row.expired .exp-label,
+.row.expiring-soon .exp-label {
+  font-weight: 600;
+  color: #8c2f2f;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Mobile (≤600px): keep one line; squeeze widths so rows fit
 ───────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .row {
     flex-wrap: nowrap;        /* keep everything on one line */
-   
   }
 
   .row input[type="text"] {
@@ -103,9 +145,11 @@ button {
     flex: 0 0 auto;
     min-width: 40px;
   }
+
+  .exp-input {
+    width: 8ch;               /* tiny squeeze on small screens */
+  }
 }
-
-
 
 /* ──────────────────────────────────────────────────────────────────────────
    Pantry folders & items
@@ -150,5 +194,3 @@ button {
   margin-left: 0.5em !important;
   padding-left: 0 !important;
 }
-}
-
