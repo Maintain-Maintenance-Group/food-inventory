@@ -110,8 +110,16 @@ button {
 }
 
 .row.expiring-soon {
-  background: #fff9e6;
-  border-left: 3px solid #f6a800;
+  background: #fffde1;
+  border-left: 3px solid #ffd400;
+}
+.row.expiring-soon .exp-input {
+  background: #fffbe6;          /* subtle tint inside the field */
+  border-color: #ffd400;
+}
+.row.expiring-soon .exp-label {
+  color: #7a6a00;               /* readable on yellow */
+  font-weight: 700;
 }
 
 .row.expired .exp-label,
