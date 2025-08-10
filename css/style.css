@@ -102,6 +102,64 @@ button {
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
+   Fill-level buttons (Empty / Half / Full)
+───────────────────────────────────────────────────────────────────────────── */
+.level-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;              /* space after +/- */
+  flex: 0 0 auto;
+}
+
+.level-btn {
+  padding: 6px 8px;
+  border: 1px solid #888;
+  background: #fff;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  min-width: 3.8ch;              /* compact; 3 side-by-side ≈ exp width */
+  text-align: center;
+}
+
+/* Active (selected) state base */
+.level-btn.active {
+  font-weight: 700;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.05) inset;
+}
+
+/* Color coding for each state when active */
+.level-btn[data-level="empty"].active {
+  background: #ffe8e8;           /* light red */
+  border-color: #e53935;
+  color: #962a2a;
+}
+
+.level-btn[data-level="half"].active {
+  background: #fff8b3;           /* bright, non-orange yellow */
+  border-color: #ffea00;
+  color: #6b6b00;
+}
+
+.level-btn[data-level="full"].active {
+  background: #e8ffe9;           /* light green */
+  border-color: #28a745;
+  color: #1e7a32;
+}
+
+/* Tiny responsiveness tweak so the group stays tidy on small screens */
+@media (max-width: 600px) {
+  .level-btn {
+    padding: 5px 6px;
+    font-size: 0.8rem;
+    min-width: 3.6ch;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
    Status highlights (set by JS)
 ───────────────────────────────────────────────────────────────────────────── */
 .row.expired {
