@@ -1,13 +1,17 @@
-// ─── Imports ────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Pantry page with EXP field (MM-YY or MM-DD-YY) + expiry highlighting
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Firebase imports
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
 import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged }
   from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 
-// Keep track of which folders are currently open
+// Keep which folders are currently open
 const expandedFolders = new Set();
 
-// ─── Firebase config (reuse your existing config) ───────────────────────
+// ─── Firebase config (yours) ───────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyADqsTz-IHi5JvXLh1pqqFFTZT8RxfBlps",
   authDomain: "food-inventory-data-3c5cb.firebaseapp.com",
@@ -18,19 +22,137 @@ const firebaseConfig = {
   appId: "1:731050960925:web:29241f709b5c94aedd3ef4"
 };
 
-// ─── Init Firebase & Auth & DB ─────────────────────────────────────────
+// ─── Init Firebase ─────────────────────────────────────────────────────
 const app      = initializeApp(firebaseConfig);
 const db       = getDatabase(app);
 const auth     = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// ─── Cache Auth UI elements ────────────────────────────────────────────
-const btnSignIn    = document.getElementById('sign-in');
-const btnSignOut   = document.getElementById('sign-out');
-const signedInDiv  = document.getElementById('signed-in');
-const userEmailSpan= document.getElementById('user-email');
+// ─── Auth UI elements ─────────────────────────────────────────────────
+const btnSignIn     = document.getElementById('sign-in');
+const btnSignOut    = document.getElementById('sign-out');
+const signedInDiv   = document.getElementById('signed-in');
+const userEmailSpan = document.getElementById('user-email');
 
-// ─── Auth observer ─────────────────────────────────────────────────────
+// ─── Expiry helpers (accepts MM-YY or MM-DD-YY) ───────────────────────
+function todayISO() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`; // YYYY-MM-DD
+}
+function endOfMonthISO(y, m) {
+  const last = new Date(y, Number(m), 0).getDate();
+  return `${y}-${m}-${String(last).padStart(2, '0')}`;
+}
+function toComparableDate(iso) {
+  // iso can be 'YYYY-MM' or 'YYYY-MM-DD'
+  if (!iso) return null;
+  if (iso.length === 7) { // month only
+    const [y, m] = iso.split('-');
+    return endOfMonthISO(y, m);
+  }
+  if (iso.length === 10) return iso;
+  return null;
+}
+function addDaysISO(isoYYYYMMDD, days) {
+  const [y, m, d] = isoYYYYMMDD.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + days);
+  const yy = dt.getFullYear();
+  const mm = String(dt.getMonth() + 1).padStart(2, '0');
+  const dd = String(dt.getDate()).padStart(2, '0');
+  return `${yy}-${mm}-${dd}`;
+}
+function isExpired(iso) {
+  const c = toComparableDate(iso);
+  return c ? (c < todayISO()) : false;
+}
+function isExpiringSoon(iso) {
+  const c = toComparableDate(iso);
+  if (!c) return false;
+  const today = todayISO();
+  const in7   = addDaysISO(today, 7);
+  return (c >= today && c <= in7);
+}
+function applyExpiryStyle(rowEl, iso) {
+  rowEl.classList.toggle('expired', isExpired(iso));
+  rowEl.classList.toggle('expiring-soon', !isExpired(iso) && isExpiringSoon(iso));
+}
+
+// Formatting & parsing between display and DB
+function formatISOforDisplay(iso) {
+  // 'YYYY-MM' -> 'MM-YY'; 'YYYY-MM-DD' -> 'MM-DD-YY'
+  if (!iso) return '';
+  const parts = iso.split('-');
+  if (parts.length === 2) {
+    const [y, m] = parts;
+    return `${m}-${y.slice(2)}`;
+  }
+  if (parts.length === 3) {
+    const [y, m, d] = parts;
+    return `${m}-${d}-${y.slice(2)}`;
+  }
+  return '';
+}
+function parseDisplayToISO(input) {
+  // Accept: MM-YY, MMYY, MM-DD-YY, MMDDYY, MM-DD-YYYY, MMDDYYYY
+  if (!input) return '';
+  const digits = input.replace(/[^\d]/g, '');
+  // MMYY -> YYYY-MM
+  if (digits.length === 4) {
+    const mm = digits.slice(0,2);
+    const yy = digits.slice(2,4);
+    return `20${yy}-${mm}`;
+  }
+  // MMDDYY -> YYYY-MM-DD
+  if (digits.length === 6) {
+    const mm = digits.slice(0,2);
+    const dd = digits.slice(2,4);
+    const yy = digits.slice(4,6);
+    return `20${yy}-${mm}-${dd}`;
+  }
+  // MMDDYYYY -> YYYY-MM-DD
+  if (digits.length === 8) {
+    const mm = digits.slice(0,2);
+    const dd = digits.slice(2,4);
+    const yyyy = digits.slice(4,8);
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  // fallback for YYYYMM or YYYYMMDD
+  if (digits.length === 6) {
+    const yyyy = digits.slice(0,4);
+    const mm = digits.slice(4,6);
+    return `${yyyy}-${mm}`;
+  }
+  if (digits.length === 8) {
+    const yyyy = digits.slice(0,4);
+    const mm = digits.slice(4,6);
+    const dd = digits.slice(6,8);
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  return '';
+}
+function maskExpiryInput(raw) {
+  // As you type: 2-2-2 or 2-2-4
+  const digits = raw.replace(/[^\d]/g, '').slice(0,8);
+  if (digits.length <= 4) {
+    // MMYY
+    if (digits.length <= 2) return digits;
+    return digits.slice(0,2) + '-' + digits.slice(2);
+  }
+  if (digits.length <= 6) {
+    // MMDDYY
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return digits.slice(0,2) + '-' + digits.slice(2);
+    return digits.slice(0,2) + '-' + digits.slice(2,4) + '-' + digits.slice(4);
+  }
+  // MMDDYYYY
+  return digits.slice(0,2) + '-' + digits.slice(2,4) + '-' + digits.slice(4,8);
+}
+
+// ─── Auth observer ────────────────────────────────────────────────────
 onAuthStateChanged(auth, user => {
   const addFolderBtn = document.getElementById('add-folder');
   const container    = document.getElementById('pantry-container');
@@ -49,60 +171,47 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-// ─── Sign-in/out handlers ─────────────────────────────────────────────
+// Sign-in/out
 btnSignIn.onclick  = () => signInWithPopup(auth, provider);
 btnSignOut.onclick = () => signOut(auth);
 
-// ─── Main setup once authenticated ────────────────────────────────────
+// ─── Main setup after auth ────────────────────────────────────────────
 function setupPantryListeners() {
   const pantryRef = ref(db, 'pantry');
-  let pantryData = {};        // { folderName: [items] }
+  let pantryData = {};        // { folderName: [ {name, quantity, expires?} ] }
 
-  // Listen for data changes
+  // Listen for DB changes
   onValue(pantryRef, snap => {
     pantryData = snap.val() || {};
     renderPantry(pantryData);
   });
 
-    // Add a new folder (with debug + immediate UI update)
+  // Add a new folder
   document.getElementById('add-folder').onclick = () => {
     const name = prompt('New folder name:');
-    console.log('🗂️ Add folder clicked, name =', name);
     if (!name) return;
-
-    // 1) Update local data
     pantryData[name] = pantryData[name] || [];
-
-    // 2) Immediately redraw the UI so you can see it
+    expandedFolders.add(name);
     renderPantry(pantryData);
-
-    // 3) Save to Firebase in the background
-    set(pantryRef, pantryData)
-      .then(() => console.log('✅ Pantry saved with new folder'))
-      .catch(console.error);
+    set(pantryRef, pantryData).catch(console.error);
   };
 
-
-  // Render function
+  // Render everything
   function renderPantry(data) {
     const container = document.getElementById('pantry-container');
-    container.innerHTML = '';   // clear
+    container.innerHTML = '';
 
-    // For each folder
     Object.entries(data).forEach(([folder, items]) => {
       // Folder header
       const fld = document.createElement('div');
       fld.className = 'folder';
 
-      // Decide if this folder should start open
-const isExpanded = expandedFolders.has(folder);
+      const isExpanded = expandedFolders.has(folder);
 
-// Arrow icon
-const arrow = document.createElement('span');
-arrow.className = 'arrow';
-arrow.textContent = isExpanded ? '▼' : '▶';
-fld.appendChild(arrow);
-
+      const arrow = document.createElement('span');
+      arrow.className = 'arrow';
+      arrow.textContent = isExpanded ? '▼' : '▶';
+      fld.appendChild(arrow);
 
       const title = document.createElement('span');
       title.textContent = folder;
@@ -115,70 +224,57 @@ fld.appendChild(arrow);
       addBtn.className   = 'folder-add';
       fld.appendChild(addBtn);
 
-// Delete‐folder button
-const removeBtn = document.createElement('button');
-removeBtn.textContent = '🗑️';
-removeBtn.className   = 'folder-remove';
-fld.appendChild(removeBtn);
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '🗑️';
+      removeBtn.className   = 'folder-remove';
+      fld.appendChild(removeBtn);
 
-removeBtn.addEventListener('pointerdown', e => {
-  e.preventDefault();
-  // Ask first:
-  if (!confirm(`Delete folder “${folder}” and all its items?`)) return;
-  // Remove from local data
-  delete pantryData[folder];
-  expandedFolders.delete(folder);
-  // Update UI immediately
-  renderPantry(pantryData);
-  // Persist to Firebase
-  set(ref(db, 'pantry'), pantryData).catch(console.error);
-});
+      // Delete folder (with confirm)
+      removeBtn.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        if (!confirm(`Delete folder “${folder}” and all its items?`)) return;
+        delete pantryData[folder];
+        expandedFolders.delete(folder);
+        renderPantry(pantryData);
+        set(pantryRef, pantryData).catch(console.error);
+      });
 
       container.appendChild(fld);
 
-// The items container
-const list = document.createElement('div');
-list.className     = 'folder-items';
-list.style.display = isExpanded ? 'block' : 'none';
-container.appendChild(list);
+      // Items container
+      const list = document.createElement('div');
+      list.className     = 'folder-items';
+      list.style.display = isExpanded ? 'block' : 'none';
+      container.appendChild(list);
 
+      // Toggle open/close
       arrow.onclick = () => {
-  const showing = list.style.display === 'block';
-  if (showing) {
-    // close folder
-    arrow.textContent = '▶';
-    list.style.display = 'none';
-    expandedFolders.delete(folder);
-  } else {
-    // open folder
-    arrow.textContent = '▼';
-    list.style.display = 'block';
-    expandedFolders.add(folder);
-  }
-};
+        const showing = list.style.display === 'block';
+        if (showing) {
+          arrow.textContent = '▶';
+          list.style.display = 'none';
+          expandedFolders.delete(folder);
+        } else {
+          arrow.textContent = '▼';
+          list.style.display = 'block';
+          expandedFolders.add(folder);
+        }
+      };
 
-
+      // Add item to this folder
       addBtn.onclick = () => {
-  items.push({ name: '', quantity: 0 });
+        items.push({ name: '', quantity: 0, expires: '' });  // add expires
+        expandedFolders.add(folder);
+        renderPantry(pantryData);
+        set(pantryRef, pantryData).catch(console.error);
+      };
 
-  // ensure this folder stays open
-  expandedFolders.add(folder);
-
-  // immediately re-render so you see the new row
-  renderPantry(pantryData);
-
-  // then save to Firebase
-  set(pantryRef, pantryData)
-    .catch(console.error);
-};
-
-
-      // Render each item row
+      // Render rows
       items.forEach((item, i) => {
         const row = document.createElement('div');
         row.className = 'row';
 
-        // Delete
+        // Delete row
         const del = document.createElement('button');
         del.textContent = '🗑️';
         del.classList.add('delete-btn');
@@ -192,7 +288,7 @@ container.appendChild(list);
         // Name
         const nameInput = document.createElement('input');
         nameInput.type = 'text';
-        nameInput.value = item.name;
+        nameInput.value = item.name || '';
         nameInput.placeholder = 'Item name';
         nameInput.onchange = () => {
           items[i].name = nameInput.value;
@@ -206,7 +302,7 @@ container.appendChild(list);
         minus.addEventListener('pointerdown', e => {
           e.preventDefault();
           item.quantity = Math.max(0, (item.quantity || 0) - 1);
-          row.querySelector('input[type=number]').value = item.quantity;
+          qty.value = item.quantity;
           set(pantryRef, pantryData);
         });
         row.appendChild(minus);
@@ -215,9 +311,9 @@ container.appendChild(list);
         const qty = document.createElement('input');
         qty.type = 'number';
         qty.min = 0;
-        qty.value = item.quantity;
+        qty.value = item.quantity || 0;
         qty.onchange = () => {
-          items[i].quantity = parseInt(qty.value) || 0;
+          items[i].quantity = parseInt(qty.value, 10) || 0;
           set(pantryRef, pantryData);
         };
         row.appendChild(qty);
@@ -233,9 +329,46 @@ container.appendChild(list);
         });
         row.appendChild(plus);
 
+        // ── EXP (right of +/-). Accepts MM-YY or MM-DD-YY ───────────────
+        const expGroup = document.createElement('span');
+        expGroup.className = 'exp-group';
+
+        const expLabel = document.createElement('span');
+        expLabel.textContent = 'EXP';
+        expLabel.className = 'exp-label';
+        expGroup.appendChild(expLabel);
+
+        const exp = document.createElement('input');
+        exp.type = 'text';
+        exp.inputMode = 'numeric';
+        exp.placeholder = 'MM-YY or MM-DD-YY';
+        exp.maxLength = 10; // fits MM-DD-YYYY too
+        exp.className = 'exp-input';
+
+        // Show existing value from DB ('YYYY-MM' or 'YYYY-MM-DD')
+        exp.value = formatISOforDisplay(item.expires || '');
+
+        // Live mask while typing
+        exp.addEventListener('input', () => {
+          exp.value = maskExpiryInput(exp.value);
+        });
+
+        // Save on change (allow blank)
+        exp.addEventListener('change', () => {
+          const iso = parseDisplayToISO(exp.value);
+          items[i].expires = iso;  // '' or 'YYYY-MM' or 'YYYY-MM-DD'
+          set(pantryRef, pantryData);
+          applyExpiryStyle(row, items[i].expires);
+        });
+
+        expGroup.appendChild(exp);
+        row.appendChild(expGroup);
+
+        // Initial style (expired / expiring-soon)
+        applyExpiryStyle(row, item.expires);
+
         list.appendChild(row);
       });
     });
   }
 }
-
