@@ -83,16 +83,16 @@ function applyExpiryStyle(rowEl, iso) {
 
 // Formatting & parsing between display and DB
 function formatISOforDisplay(iso) {
-  // 'YYYY-MM' -> 'MM-YY'; 'YYYY-MM-DD' -> 'MM-DD-YY'
+  // Show MM-YY for month-only; show MM-DD-YY for full dates
   if (!iso) return '';
   const parts = iso.split('-');
   if (parts.length === 2) {
     const [y, m] = parts;
-    return `${m}-${y.slice(2)}`;
+    return `${m}-${y.slice(2)}`;           // MM-YY
   }
   if (parts.length === 3) {
     const [y, m, d] = parts;
-    return `${m}-${d}-${y.slice(2)}`;
+    return `${m}-${d}-${y.slice(2)}`;      // MM-DD-YY
   }
   return '';
 }
@@ -100,12 +100,14 @@ function parseDisplayToISO(input) {
   // Accept: MM-YY, MMYY, MM-DD-YY, MMDDYY, MM-DD-YYYY, MMDDYYYY
   if (!input) return '';
   const digits = input.replace(/[^\d]/g, '');
+
   // MMYY -> YYYY-MM
   if (digits.length === 4) {
     const mm = digits.slice(0,2);
     const yy = digits.slice(2,4);
     return `20${yy}-${mm}`;
   }
+
   // MMDDYY -> YYYY-MM-DD
   if (digits.length === 6) {
     const mm = digits.slice(0,2);
@@ -113,6 +115,7 @@ function parseDisplayToISO(input) {
     const yy = digits.slice(4,6);
     return `20${yy}-${mm}-${dd}`;
   }
+
   // MMDDYYYY -> YYYY-MM-DD
   if (digits.length === 8) {
     const mm = digits.slice(0,2);
@@ -120,7 +123,8 @@ function parseDisplayToISO(input) {
     const yyyy = digits.slice(4,8);
     return `${yyyy}-${mm}-${dd}`;
   }
-  // fallback for YYYYMM or YYYYMMDD
+
+  // fallback for YYYYMM or YYYYMMDD (rare)
   if (digits.length === 6) {
     const yyyy = digits.slice(0,4);
     const mm = digits.slice(4,6);
@@ -132,24 +136,16 @@ function parseDisplayToISO(input) {
     const dd = digits.slice(6,8);
     return `${yyyy}-${mm}-${dd}`;
   }
+
   return '';
 }
 function maskExpiryInput(raw) {
-  // As you type: 2-2-2 or 2-2-4
+  // As you type: 2-2-2 or 2-2-4 → MM, MM-DD, MM-DD-YY or MM-DD-YYYY
   const digits = raw.replace(/[^\d]/g, '').slice(0,8);
-  if (digits.length <= 4) {
-    // MMYY
-    if (digits.length <= 2) return digits;
-    return digits.slice(0,2) + '-' + digits.slice(2);
-  }
-  if (digits.length <= 6) {
-    // MMDDYY
-    if (digits.length <= 2) return digits;
-    if (digits.length <= 4) return digits.slice(0,2) + '-' + digits.slice(2);
-    return digits.slice(0,2) + '-' + digits.slice(2,4) + '-' + digits.slice(4);
-  }
-  // MMDDYYYY
-  return digits.slice(0,2) + '-' + digits.slice(2,4) + '-' + digits.slice(4,8);
+  if (digits.length <= 2) return digits;                                // M, MM
+  if (digits.length <= 4) return digits.slice(0,2) + '-' + digits.slice(2); // MM-D, MM-DD
+  if (digits.length <= 6) return digits.slice(0,2) + '-' + digits.slice(2,4) + '-' + digits.slice(4); // MM-DD-YY
+  return digits.slice(0,2) + '-' + digits.slice(2,4) + '-' + digits.slice(4,8); // MM-DD-YYYY
 }
 
 // ─── Auth observer ────────────────────────────────────────────────────
@@ -341,9 +337,10 @@ function setupPantryListeners() {
         const exp = document.createElement('input');
         exp.type = 'text';
         exp.inputMode = 'numeric';
-        exp.placeholder = 'MM-YY or MM-DD-YY';
-        exp.maxLength = 10; // fits MM-DD-YYYY too
+        exp.placeholder = 'MM-DD-YY';  // set order clearly
+        exp.maxLength = 10;            // fits MM-DD-YYYY too
         exp.className = 'exp-input';
+        exp.style.width = '10ch';      // make the field a bit larger
 
         // Show existing value from DB ('YYYY-MM' or 'YYYY-MM-DD')
         exp.value = formatISOforDisplay(item.expires || '');
