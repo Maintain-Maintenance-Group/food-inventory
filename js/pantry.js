@@ -338,9 +338,9 @@ function setupPantryListeners() {
         exp.type = 'text';
         exp.inputMode = 'numeric';
         exp.placeholder = 'MM-DD-YY';  // set order clearly
-        exp.maxLength = 10;            // fits MM-DD-YYYY too
+        exp.maxLength = 12;            // fits MM-DD-YYYY too
         exp.className = 'exp-input';
-        exp.style.width = '10ch';      // make the field a bit larger
+        exp.style.width = '12ch';      // make the field a bit larger
 
         // Show existing value from DB ('YYYY-MM' or 'YYYY-MM-DD')
         exp.value = formatISOforDisplay(item.expires || '');
