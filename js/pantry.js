@@ -1,7 +1,4 @@
 import { mountInventoryPage } from './inventory.js';
-mountInventoryPage({ dbRoot: 'pantry', containerId: 'pantry-container' });
-
-import { mountInventoryPage } from './inventory.js';
 import { fetchAllInventory, generateDailyMealPlan } from './meal_suggest.js';
 import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 
@@ -13,10 +10,16 @@ window.addEventListener('DOMContentLoaded', () => {
   const pre = document.getElementById('meal-text');
   if (!btn || !pre) return;
   btn.addEventListener('click', async () => {
-    const db = getDatabase();
-    const all = await fetchAllInventory(db);
-    const plan = generateDailyMealPlan(all);
-    pre.textContent = plan.text;
-    pre.style.display = 'block';
+    try {
+      const db = getDatabase();
+      const all = await fetchAllInventory(db);
+      const plan = generateDailyMealPlan(all);
+      pre.textContent = plan.text;
+      pre.style.display = 'block';
+    } catch (err) {
+      pre.textContent = `Error generating preview: ${err?.message || err}`;
+      pre.style.display = 'block';
+      console.error(err);
+    }
   });
 });

@@ -3,9 +3,9 @@
 // score ingredients, and generate a simple daily meal plan.
 // (Front-end only for now; later we'll call this from a serverless function for SMS.)
 
-import { getDatabase, ref, get, child } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
+import { getDatabase, ref, get } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js';
 
-// --- Reuse your date helpers (copy from inventory.js so this file is standalone) ---
+// --- Reuse your date helpers (standalone) ---
 function todayISO() {
   const d = new Date();
   const y = d.getFullYear();
@@ -73,8 +73,6 @@ export async function fetchAllInventory(db) {
 
 // --- Step B: compute status & a priority score ---
 function scoreItem(it) {
-  // higher score = higher priority to use
-  // factors: expiringSoon, expired, level, low quantity
   let s = 0;
   if (isExpired(it.expires)) s += 100;
   else if (isExpiringSoon(it.expires)) s += 40;
@@ -86,14 +84,11 @@ function scoreItem(it) {
   const par = Number(it.par_min || 0);
   if (par && qty < par) s += 20;
 
-  // tiny nudge for fridge (usually more perishable)
-  if (it._location === 'fridge') s += 5;
-
+  if (it._location === 'fridge') s += 5; // perishable nudge
   return s;
 }
 
 export function indexInventory(items) {
-  // Enrich each item with status and score
   return items.map(it => ({
     ...it,
     _expired: isExpired(it.expires),
@@ -102,27 +97,22 @@ export function indexInventory(items) {
   }));
 }
 
-// --- Step C: simple pantry categories to help meal rules ---
+// --- Step C: rough classifier to help meal rules ---
 function classify(itemName = '') {
   const n = itemName.toLowerCase();
 
-  // proteins (very rough starter list; expand later)
   if (/\b(chicken|beef|pork|turkey|tofu|tempeh|egg|eggs|salmon|tuna|shrimp|beans|lentil|sausage)\b/.test(n))
     return 'protein';
 
-  // vegetables
   if (/\b(spinach|lettuce|broccoli|carrot|pepper|onion|tomato|zucchini|cucumber|kale|greens|asparagus|mushroom|celery)\b/.test(n))
     return 'vegetable';
 
-  // carbs / grains
   if (/\b(rice|pasta|noodle|bread|tortilla|quinoa|potato|roll|bun)\b/.test(n))
     return 'carb';
 
-  // condiments / sauces
   if (/\b(salsa|sauce|ketchup|mustard|mayo|aioli|soy|tamari|sriracha|dressing|vinaigrette)\b/.test(n))
     return 'condiment';
 
-  // dairy
   if (/\b(milk|cheese|yogurt|butter|cream)\b/.test(n))
     return 'dairy';
 
@@ -131,17 +121,71 @@ function classify(itemName = '') {
 
 // --- Step D: meal suggestion engine (v1 rules) ---
 export function generateDailyMealPlan(items) {
-  // Items already indexed (with _score) work best, but raw is fine too
   const pool = indexInventory(items)
-    .filter(it => Number(it.quantity || 0) > 0 || it.level !== 'empty'); // available-ish
+    .filter(it => Number(it.quantity || 0) > 0 || it.level !== 'empty');
 
-  // Sort by priority: expiring/low first
   pool.sort((a,b) => b._score - a._score);
 
-  // helper to pick first match by category (prefer higher score)
   const pick = (cat) => pool.find(it => classify(it.name) === cat);
 
-  // Breakfast: prioritize eggs/dairy + carb or fruit if present
+  // Breakfast
   const breakfast = [];
   const egg = pool.find(it => /\begg(s)?\b/i.test(it.name));
   if (egg) breakfast.push(egg);
+  const dairy = pool.find(it => classify(it.name) === 'dairy');
+  if (!egg && dairy) breakfast.push(dairy);
+  const carbB = pool.find(it => classify(it.name) === 'carb');
+  if (carbB) breakfast.push(carbB);
+
+  // Lunch
+  const lunch = [];
+  const pL = pick('protein');
+  const vL = pick('vegetable');
+  if (pL && vL) { lunch.push(pL, vL); }
+  else if (pL && !vL) {
+    lunch.push(pL);
+    const carbL = pick('carb');
+    if (carbL) lunch.push(carbL);
+  } else {
+    const carbL = pick('carb');
+    const cond = pick('condiment');
+    if (carbL) lunch.push(carbL);
+    if (cond) lunch.push(cond);
+  }
+
+  // Dinner (must have protein + vegetable)
+  const dinner = [];
+  const pD = pick('protein');
+  const vD = pick('vegetable');
+
+  let buySuggestion = null;
+  if (pD && vD) {
+    dinner.push(pD, vD);
+  } else if (!pD && vD) {
+    dinner.push(vD);
+    buySuggestion = 'protein';
+  } else if (pD && !vD) {
+    dinner.push(pD);
+    buySuggestion = 'vegetable';
+  } else {
+    dinner.push(...pool.slice(0, 2));
+    buySuggestion = 'protein & vegetable';
+  }
+
+  const fmt = (arr) => arr.filter(Boolean).map(x => `${x.name} (${x._location}/${x._folder})`).join(', ');
+  const missing = buySuggestion ? `\nMissing: ${buySuggestion} → add to list.` : '';
+
+  const text =
+`Good morning! Here are today’s ideas based on what you have:
+
+• Breakfast: ${fmt(breakfast) || '—'}
+• Lunch: ${fmt(lunch) || '—'}
+• Dinner: ${fmt(dinner) || '—'}${missing}
+
+Expiring soon:
+${pool.filter(x => x._expiringSoon).slice(0, 10).map(x => `- ${x.name} (${x._location}/${x._folder})`).join('\n') || 'None'}
+
+Reply with "ORDER" to receive a suggested order list.`;
+
+  return { breakfast, lunch, dinner, buySuggestion, text };
+}
