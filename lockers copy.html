@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Food Inventory – Lockers</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="auth-ui">
+  <button id="sign-in">🔐 Sign In with Google</button>
+  <div id="signed-in" style="display:none;">
+    <span id="user-email"></span>
+    <button id="sign-out">🚪 Sign Out</button>
+  </div>
+</div>
+<hr/>
+
+  <header>
+    <h1>Lockers</h1>
+    <p style="font-size:0.9em;"><a href="index.html">← Go to Fridge/Freezer</a></p>
+  </header>
+
+  <main id="inventory">
+    <!-- rows get injected here -->
+  </main>
+
+  <button id="add-row">+ Add Item</button>
+
+  <script type="module" src="js/main.js"></script>
+
+</body>
+</html>
+
