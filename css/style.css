@@ -109,21 +109,25 @@ button {
   border-left: 3px solid #e53935;
 }
 
+/* Brighter, less-orange yellow */
 .row.expiring-soon {
-  background: #ffff9e;
-  border-left: 3px solid #ffe000;
+  background: #ffff66;                /* bright highlighter yellow */
+  border-left: 3px solid #ffef00;     /* vivid yellow border */
 }
+
 .row.expiring-soon .exp-input {
-  background: #fffbe6;          /* subtle tint inside the field */
-  border-color: #ffd400;
+  background: #fffed1;                /* pale yellow inside field */
+  border-color: #ffea00;
 }
+
+/* Keep the label legible on yellow */
 .row.expiring-soon .exp-label {
-  color: #7a6a00;               /* readable on yellow */
+  color: #6b6b00;                     /* olive/dark yellow text */
   font-weight: 700;
 }
 
-.row.expired .exp-label,
-.row.expiring-soon .exp-label {
+/* Expired label styling only (don't override the 'expiring-soon' label) */
+.row.expired .exp-label {
   font-weight: 600;
   color: #8c2f2f;
 }
