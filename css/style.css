@@ -110,8 +110,8 @@ button {
 }
 
 .row.expiring-soon {
-  background: #fffde1;
-  border-left: 3px solid #ffd400;
+  background: #ffff9e;
+  border-left: 3px solid #ffe000;
 }
 .row.expiring-soon .exp-input {
   background: #fffbe6;          /* subtle tint inside the field */
