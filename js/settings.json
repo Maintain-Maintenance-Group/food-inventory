@@ -1,0 +1,16 @@
+{
+  "settings": {
+    "timezone": "America/New_York",
+    "send_time_weekly": "09:00",
+    "send_time_daily": "07:30",
+    "gluten_free_only": true,
+    "protein_target_g_per_serving": 30,
+    "kcal_targets": {
+      "breakfast": 350,
+      "lunch": 450,
+      "dinner": 550
+    },
+    "min_days_between_repeats": 4,
+    "spice_max": "medium"
+  }
+}
