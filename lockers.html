@@ -2,33 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Food Inventory – Lockers</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=11" />
 </head>
 <body>
-<div id="auth-ui">
-  <button id="sign-in">🔐 Sign In with Google</button>
-  <div id="signed-in" style="display:none;">
-    <span id="user-email"></span>
-    <button id="sign-out">🚪 Sign Out</button>
-  </div>
-</div>
-<hr/>
-
+  <!-- Navigation -->
   <header>
     <h1>Lockers</h1>
-    <p style="font-size:0.9em;"><a href="index.html">← Go to Fridge/Freezer</a></p>
+    <p style="font-size:0.9em;">
+      <a href="fridge.html">← Fridge</a> |
+      <a href="pantry.html">Pantry</a>
+    </p>
   </header>
 
-  <main id="inventory">
-    <!-- rows get injected here -->
-  </main>
+  <!-- Auth UI -->
+  <div id="auth-ui">
+    <button id="sign-in">🔐 Sign In with Google</button>
+    <div id="signed-in" style="display:none;">
+      <span id="user-email"></span>
+      <button id="sign-out">🚪 Sign Out</button>
+    </div>
+  </div>
+  <hr/>
 
-  <button id="add-row">+ Add Item</button>
+  <!-- Add new folder button -->
+  <button id="add-folder">+ Add Folder</button>
 
-  <script type="module" src="js/main.js"></script>
+  <!-- Where folders & items go -->
+  <div id="lockers-container"></div>
 
+  <script type="module" src="js/lockers.js"></script>
 </body>
 </html>
-
