@@ -1,5 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Pantry page with EXP field (MM-YY or MM-DD-YY) + expiry highlighting
+// + Fill-level buttons (Empty / Half / Full)
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Firebase imports
@@ -174,7 +175,7 @@ btnSignOut.onclick = () => signOut(auth);
 // ─── Main setup after auth ────────────────────────────────────────────
 function setupPantryListeners() {
   const pantryRef = ref(db, 'pantry');
-  let pantryData = {};        // { folderName: [ {name, quantity, expires?} ] }
+  let pantryData = {};        // { folderName: [ {name, quantity, expires?, level?} ] }
 
   // Listen for DB changes
   onValue(pantryRef, snap => {
@@ -259,7 +260,7 @@ function setupPantryListeners() {
 
       // Add item to this folder
       addBtn.onclick = () => {
-        items.push({ name: '', quantity: 0, expires: '' });  // add expires
+        items.push({ name: '', quantity: 0, expires: '', level: null });  // include level
         expandedFolders.add(folder);
         renderPantry(pantryData);
         set(pantryRef, pantryData).catch(console.error);
@@ -325,7 +326,41 @@ function setupPantryListeners() {
         });
         row.appendChild(plus);
 
-        // ── EXP (right of +/-). Accepts MM-YY or MM-DD-YY ───────────────
+        // ── Level buttons (Empty / Half / Full) — inserted here ─────────
+        const levelGroup = document.createElement('span');
+        levelGroup.className = 'level-group';
+
+        const levels = [
+          { key: 'empty', label: 'Empty' },
+          { key: 'half',  label: 'Half'  },
+          { key: 'full',  label: 'Full'  },
+        ];
+
+        levels.forEach(({ key, label }) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'level-btn';
+          b.dataset.level = key;
+          b.textContent = label;
+
+          // restore selection
+          if (item.level === key) b.classList.add('active');
+
+          b.addEventListener('pointerdown', e => {
+            e.preventDefault();
+            // single-select
+            levelGroup.querySelectorAll('.level-btn').forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            items[i].level = key;  // save to DB schema
+            set(pantryRef, pantryData);
+          });
+
+          levelGroup.appendChild(b);
+        });
+
+        row.appendChild(levelGroup);
+
+        // ── EXP (right of level buttons). Accepts MM-YY or MM-DD-YY ─────
         const expGroup = document.createElement('span');
         expGroup.className = 'exp-group';
 
